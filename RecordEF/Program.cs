@@ -30,13 +30,58 @@ namespace RecordEF
             // UpdateRecord();
             // UpdateRecord();
             // GetRecord(1135);
-            // DeleteRecord(5252);
+            // DeleteRecord(5253);
             // GetBiography(114);
             // ShowArtist(114);
             // InsertArtist();
             // UpdateArtist(828);
             // GetArtistId(string.Empty, "Led Zeppelin");
-            DeleteArtist(828);
+            // DeleteArtist(828);
+            // SelectArtistWithNoBio();
+            // GetArtist(114);
+            // DeleteArtist(828);
+        }
+
+        /// <summary>
+        /// Get Artist details including the artist biography.
+        /// </summary>
+        private static void GetArtist(int artistId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
+
+                if (artist is Artist)
+                {
+                    Console.WriteLine(artist);
+                }
+                else
+                {
+                    Console.WriteLine($"Artist with Id: {artistId} not found!");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Select all artists with no biography.
+        /// </summary>
+        public static void SelectArtistWithNoBio()
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artists = context.Artists.Where(a => string.IsNullOrEmpty(a.Biography))
+                    .OrderBy(a => a.LastName)
+                    .ThenBy(a => a.FirstName)
+                    .ToList();
+
+                if (artists.Any())
+                {
+                    foreach (var artist in artists)
+                    {
+                        Console.WriteLine($"{artist}");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -44,10 +89,18 @@ namespace RecordEF
         /// </summary>
         private static void DeleteArtist(int artistId)
         {
-            var artistData = new ArtistData();
-            artistData.Delete(artistId);
+            using (var context = new RecordDbContext())
+            {
+                var artist = context.Artists.FirstOrDefault(r => r.ArtistId == artistId);
 
-            Console.WriteLine("Artist deleted");
+                if (artist != null)
+                {
+                    context.Artists.Remove(artist);
+                    context.SaveChanges();
+
+                    Console.WriteLine($"Artist with Id: {artistId} deleted.");
+                }
+            }
         }
 
         /// <summary>

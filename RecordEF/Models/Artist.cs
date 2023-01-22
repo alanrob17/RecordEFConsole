@@ -19,7 +19,8 @@ public partial class Artist
 
     public override string ToString()
     {
-        return $"Artist Id: {ArtistId}, Artist: {Name}, Biography: {Biography.Substring(0, 30)}...";
-    }
+        var biography = string.IsNullOrEmpty(Biography) ? "No Biography" : (Biography.Length > 30 ? Biography.Substring(0, 30) + "..." : Biography);
 
+        return $"Artist Id: {ArtistId}, Artist: {Name}, Biography: {biography}";
+    }
 }
