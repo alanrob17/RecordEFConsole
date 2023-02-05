@@ -1,4 +1,6 @@
-﻿using RecordEF.Models;
+﻿using Microsoft.IdentityModel.Tokens;
+using RecordEF.Data;
+using RecordEF.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,242 +12,104 @@ namespace RecordEF.Data
     public class RecordData
     {
         /// <summary>
-        /// Delete record.
+        /// Insert a new record.
         /// </summary>
-        public static void DeleteRecord(int recordId)
+        public static Record CreateRecord(Record record)
         {
             using (var context = new RecordDbContext())
             {
-                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
-                if (record != null)
-                {
-                    context.Records.Remove(record);
-                    context.SaveChanges();
+                context.Records.Add(record);
+                context.SaveChanges();
 
-                    Console.WriteLine($"Record with Id: {recordId} deleted.");
-                }
-            }
-
-        }
-
-        /// <summary>
-        /// Get record details including the artist biography.
-        /// </summary>
-        public static void GetRecord(int recordId)
-        {
-            using (var context = new RecordDbContext())
-            {
-                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
-
-                if (record is Record)
-                {
-                    var artist = context.Artists.FirstOrDefault(r => r.ArtistId == record.ArtistId);
-
-                    if (artist is Artist)
-                    {
-                        Console.WriteLine($"{artist.Name}");
-                    }
-
-                    Console.WriteLine($"\t{record}");
-                }
-                else
-                {
-                    Console.WriteLine($"Record with Id: {recordId} not found!");
-                }
+                var newRecord = context.Records.FirstOrDefault(r => r.Name == record.Name);
+                return newRecord ?? new Record { RecordId = 0 };
             }
         }
 
         /// <summary>
         /// Update a record using variables.
         /// </summary>
-        public static void UpdateRecord()
+        public static Record UpdateRecord(Record record)
         {
-            IFormatProvider culture = System.Threading.Thread.CurrentThread.CurrentCulture;
-
-            var date = "21-06-2015";
-            var recordId = 5251;
-
             using (var context = new RecordDbContext())
             {
-                var recordToUpdate = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+                var recordToUpdate = context.Records.FirstOrDefault(r => r.RecordId == record.RecordId);
 
                 if (recordToUpdate != null)
                 {
-                    recordToUpdate.ArtistId = 528;
-                    recordToUpdate.Name = "No Fun In Paradise";
-                    recordToUpdate.Recorded = 1987;
-                    recordToUpdate.Label = "Whoppo";
-                    recordToUpdate.Pressing = "Au";
-                    recordToUpdate.Field = "Jazz";
-                    recordToUpdate.Rating = "****";
-                    recordToUpdate.Discs = 1;
-                    recordToUpdate.Media = "CD";
-                    recordToUpdate.Bought = DateTime.Parse(date, culture, System.Globalization.DateTimeStyles.AssumeLocal);
-                    recordToUpdate.Cost = 12.99m;
-                    recordToUpdate.CoverName = string.Empty;
-                    recordToUpdate.Review = "This is Alan's third album. Just before he went mad!";
-
+                    // I have to add the ArtistId into the new record.
+                    var artistId = recordToUpdate.ArtistId;
+                    record.ArtistId = artistId;
+                    context.Entry(recordToUpdate).CurrentValues.SetValues(record);
                     context.SaveChanges();
-
-                    Console.WriteLine($"Record Id: {recordId} updated.");
                 }
+
+                var updatedRecord = context.Records.FirstOrDefault(r => r.RecordId == record.RecordId);
+                return updatedRecord ?? new Record { RecordId = 0 };
             }
         }
 
         /// <summary>
-        /// Insert a new record.
+        /// Delete record.
         /// </summary>
-        public static void InsertRecord()
+        public static int DeleteRecord(int recordId)
         {
-            Record record = new()
-            {
-                ArtistId = 528,
-                Name = "Fun In Paradise",
-                Recorded = 1986,
-                Label = "Whoppo",
-                Pressing = "Au",
-                Field = "Rock",
-                Rating = "****",
-                Discs = 1,
-                Media = "CD",
-                Bought = new DateTime(2015, 05, 06),
-                Cost = 10.99m,
-                CoverName = string.Empty,
-                Review = "This is Alan's second album."
-            };
+            var recId = 0;
 
             using (var context = new RecordDbContext())
             {
-                var records = context.Records;
-                records.Add(record);
-                context.SaveChanges();
-
-                var newRecord = context.Records.OrderByDescending(x => x.RecordId).FirstOrDefault();
-
-                if (newRecord != null)
+                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+                if (record != null)
                 {
-                    Console.WriteLine($"The new record name is {newRecord.Name} and has a RecordId of: {newRecord.RecordId}");
+                    recId = record.RecordId;
+                    context.Records.Remove(record);
+                    context.SaveChanges();
                 }
             }
+
+            return recId;
         }
 
-        /// <summary>
-        /// Count the number of discs.
-        /// </summary>
-        public static void CountDiscs()
+        public static List<Record> GetRecords()
         {
-            RecordDbContext context = new();
-
-            var mediaTypes = new List<string> { "DVD", "CD/DVD", "Blu-ray", "CD/Blu-ray" };
-            var sumOfDiscs = context.Records
-                .Where(r => mediaTypes.Contains(r.Media))
-                .Sum(r => r.Discs);
-
-            if (sumOfDiscs > 0)
+            var list = new List<Record>();
+            using (var context = new RecordDbContext())
             {
-                Console.WriteLine($"\tNumber of DVD or Blu-ray Discs: {sumOfDiscs}");
-            }
-
-            sumOfDiscs = context.Records
-                .Where(r => r.Media == "CD")
-                .Sum(r => r.Discs);
-
-            if (sumOfDiscs > 0)
-            {
-                Console.WriteLine($"\tNumber of CD audio Discs: {sumOfDiscs}");
+                return list = context.Records.OrderBy(r => r.ArtistId).ThenBy(r => r.Recorded).ToList();
             }
         }
 
-        /// <summary>
-        /// Get number of records for an artist.
-        /// </summary>
-        public static void GetArtistNumberOfRecords(int artistId)
+        public static dynamic? GetArtistRecordEntity(int recordId)
         {
-            RecordDbContext context = new();
-
-            var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
-
-            var sumOfDiscs = context.Records
-                .Where(r => r.ArtistId == 114)
-                .Select(r => r.Discs)
-                .Sum();
-
-            if (sumOfDiscs > 0 && artist is Artist)
+            using (var context = new RecordDbContext())
             {
-                Console.WriteLine($"{artist.Name}");
-                Console.WriteLine($"\tNumber of Discs: {sumOfDiscs}");
-            }
-        }
+                var record = context.Records
+                    .Join(context.Artists, r => r.ArtistId, a => a.ArtistId, (r, a) => new
+                    {
+                        ArtistId = a.ArtistId,
+                        Artist = a.Name,
+                        RecordId = r.RecordId,
+                        Name = r.Name,
+                        Recorded = r.Recorded,
+                        Rating = r.Rating,
+                        Media = r.Media
+                    })
+                    .FirstOrDefault(r => r.RecordId == recordId);
 
-        /// <summary>
-        /// Get record details from ToString method.
-        /// </summary>
-        public static void GetFormattedRecord(int recordId)
-        {
-            RecordDbContext context = new();
-
-            var record = context.Records.SingleOrDefault(r => r.RecordId == recordId);
-
-            if (record is Record)
-            {
-                Console.WriteLine(record);
-            }
-        }
-
-        /// <summary>
-        /// Get the number of discs for a particular year.
-        /// </summary>
-        public static void GetRecordedYearDiscCount(int year)
-        {
-            RecordDbContext context = new();
-
-            var records = context.Records.ToList();
-
-            var numberOfDiscs = records
-                .Where(r => r.Recorded == year)
-                .Select(r => r.Discs)
-                .Sum();
-
-            Console.WriteLine($"The total number of discs for Year: {year} are {numberOfDiscs}");
-        }
-
-        /// <summary>
-        /// Get a list of records without reviews.
-        /// </summary>
-        public static void NoRecordReviews()
-        {
-            RecordDbContext context = new();
-
-            var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-            var records = context.Records.ToList();
-
-            foreach (var r in records)
-            {
-                Console.WriteLine($"{r.Artist.Name} - Id: {r.RecordId} - {r.Name} - {r.RecordId}");
-            }
-        }
-
-        /// <summary>
-        /// Get total cost spent on each artist.
-        /// </summary>
-        public static void GetTotals()
-        {
-            RecordDbContext context = new();
-
-            var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-            var records = context.Records.ToList();
-
-            foreach (var a in artists)
-            {
-                var cost = a.Records.Sum(c => c.Cost);
-                var discs = a.Records.Sum(d => d.Discs);
-
-                Console.WriteLine($"{a.Name}\n\t Total discs: {discs} - Total cost: ${cost:F2}\n");
+                if (record != null)
+                {
+                    return record;
+                }
             }
 
+            return null;
         }
 
-        public static void GetArtistsAndRecords2()
+        /// <summary>
+        /// Get Artist and their record details.
+        /// Called by GetRecordList3
+        /// </summary>
+        public static IEnumerable<dynamic> GetRecordList()
         {
             using (var context = new RecordDbContext())
             {
@@ -253,67 +117,23 @@ namespace RecordEF.Data
                     .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { record, artist })
                     .OrderBy(r => r.artist.LastName)
                     .ThenBy(r => r.artist.FirstName)
-                    .ThenByDescending(r => r.record.Recorded)
+                    .ThenBy(r => r.record.Recorded)
                     .ToList();
 
-                foreach (var r in records)
+                return records.Select(r => new
                 {
-                    Console.WriteLine($"{r.artist.Name}: {r.record.Name} - {r.record.Recorded} - {r.record.Media}");
-                }
+                    ArtistId = r.artist.ArtistId,
+                    Artist = r.artist.Name,
+                    RecordId = r.record.RecordId,
+                    Name = r.record.Name,
+                    Recorded = r.record.Recorded,
+                    Rating = r.record.Rating,
+                    Media = r.record.Media
+                });
             }
         }
 
-        // better output than version 2
-        public static void GetArtistsAndRecords()
-        {
-            RecordDbContext context = new();
-
-            var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-            var records = context.Records.ToList();
-
-            foreach (var a in artists)
-            {
-                Console.WriteLine($"{a.Name}");
-
-
-                var collection = a.Records.OrderByDescending(r => r.Recorded).ThenBy(r => r.Media).ToList();
-
-                foreach (var r in collection)
-                {
-                    Console.WriteLine($"\t{r.Recorded} - {r.Name} - ({r.Media})");
-                }
-
-                Console.WriteLine();
-            }
-        }
-
-        // another version of this method
-        public static void GetArtistRecordByYear2(int year)
-        {
-            RecordDbContext context = new();
-
-            var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-
-            var records = context.Records.Where(r => r.Recorded == year).ToList();
-
-            var results = artists
-                .Join(records, artist => artist.ArtistId, record => record.ArtistId, (artist, record) => new { artist, record })
-                .Where(x => x.record.Recorded == year)
-                .OrderBy(x => x.artist.LastName)
-                .ThenBy(x => x.artist.FirstName)
-                .ThenBy(x => x.record.Name)
-                .ThenBy(x => x.record.Media)
-                .ToList();
-
-            Console.WriteLine($"Recordings by year: {year}");
-
-            foreach (var r in results)
-            {
-                Console.WriteLine($"\t{r.artist.Name} - {r.record.Name} - {r.record.Recorded} ({r.record.Media})");
-            }
-        }
-
-        public static void GetArtistRecordByYear(int year)
+        public static IEnumerable<dynamic> GetArtistRecordByYear(int year)
         {
             using (var context = new RecordDbContext())
             {
@@ -324,17 +144,303 @@ namespace RecordEF.Data
                     .ThenBy(r => r.artist.FirstName)
                     .ToList();
 
-                if (records.Any())
+                return records.Select(r => new
                 {
-                    Console.WriteLine($"Recordings by year: {year}");
+                    ArtistId = r.artist.ArtistId,
+                    Artist = r.artist.Name,
+                    RecordId = r.record.RecordId,
+                    Name = r.record.Name,
+                    Recorded = r.record.Recorded,
+                    Rating = r.record.Rating,
+                    Media = r.record.Media
+                });
+            }
+        }
 
-                    foreach (var r in records)
+
+        /// <summary>
+        /// Get record details including the artist name.
+        /// </summary>
+        public static string GetArtistRecord(int recordId)
+        {
+            var artistRecord = new StringBuilder();
+
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+
+                if (record is Record)
+                {
+                    var artist = context.Artists.FirstOrDefault(r => r.ArtistId == record.ArtistId);
+
+                    if (artist is Artist)
                     {
-                        Console.WriteLine($"\t{r.artist.Name} - {r.record.Name} - {r.record.Recorded} ({r.record.Media})");
+                        artistRecord.Append($"{artist.Name}");
                     }
+
+                    artistRecord.Append($" {record.ToString()}");
+                }
+                else
+                {
+                    artistRecord.Append($"Record with Id: {recordId} not found!");
+                }
+            }
+
+            return artistRecord.ToString();
+        }
+
+        /// <summary>
+        /// Get record details.
+        /// </summary>
+        public static Record GetRecordEntity(int recordId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+
+                if (record is Record)
+                {
+                    return record;
+                }
+                else
+                {
+                    Record missingRecord = new()
+                    {
+                        RecordId = 0
+                    };
+
+                    return missingRecord;
                 }
             }
         }
 
+        /// <summary>
+        /// Count the number of discs.
+        /// </summary>
+        public static int CountAllDiscs(string media = "")
+        {
+            StringBuilder count = new StringBuilder();
+            var mediaTypes = new List<string>();
+
+            switch (media)
+            {
+                case "":
+                    mediaTypes = new List<string> { "DVD", "CD/DVD", "Blu-ray", "CD/Blu-ray", "CD", "R" };
+                    break;
+                case "DVD":
+                    mediaTypes = new List<string> { "DVD", "CD/DVD", "Blu-ray", "CD/Blu-ray" };
+                    break;
+                case "CD":
+                    mediaTypes = new List<string> { "CD" };
+                    break;
+                case "R":
+                    mediaTypes = new List<string> { "R" };
+                    break;
+                default:
+                    break;
+            }
+
+            using (var context = new RecordDbContext())
+            {
+                var sumOfDiscs = context.Records
+                    .Where(r => mediaTypes.Contains(r.Media))
+                    .Sum(r => r.Discs);
+
+                return (int)sumOfDiscs;
+            }
+        }
+
+        /// <summary>
+        /// Get number of records for an artist.
+        /// </summary>
+        public static int GetArtistNumberOfRecords(int artistId)
+        {
+            var discs = 0;
+
+            using (var context = new RecordDbContext())
+            {
+                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
+
+                var sumOfDiscs = context.Records
+                    .Where(r => r.ArtistId == 114)
+                    .Select(r => r.Discs)
+                    .Sum();
+
+                if (sumOfDiscs > 0 && artist is Artist)
+                {
+                    discs = (int)sumOfDiscs;
+                }
+            }
+
+            return discs;
+        }
+
+        /// <summary>
+        /// Get record details from ToString method.
+        /// </summary>
+        public static string GetFormattedRecord(int recordId)
+        {
+            var recordDetails = string.Empty;
+
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records.SingleOrDefault(r => r.RecordId == recordId);
+
+                if (record is Record)
+                {
+                    recordDetails = record.ToString();
+                }
+            }
+
+            return recordDetails;
+        }
+
+        public static string GetArtistNameFromRecord(int recordId)
+        {
+            var artistName = string.Empty;
+
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records
+                    .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { record, artist })
+                    .Where(r => r.record.RecordId == recordId)
+                    .ToList();
+
+                if (record.Any())
+                {
+                    artistName = record[0].artist.Name;
+                }
+            }
+
+            return artistName;
+        }
+
+        /// <summary>
+        /// Get the number of discs for a particular year.
+        /// </summary>
+        public static int GetDiscCountForYear(int year)
+        {
+            var discCount = 0;
+
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.ToList();
+
+                var numberOfDiscs = records
+                    .Where(r => r.Recorded == year)
+                    .Select(r => r.Discs)
+                    .Sum();
+
+                discCount = (int)numberOfDiscs;
+            }
+
+            return discCount;
+        }
+
+        /// <summary>
+        /// Get the number of discs that I bought for a particular year.
+        /// </summary>
+        public static int GetBoughtDiscCountForYear(int year)
+        {
+            var discCount = 0;
+
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.ToList();
+
+                var numberOfDiscs = records
+                    .Where(r => r.Bought != null && r.Bought.Value.Year == year)
+                    .Select(r => r.Discs)
+                    .Sum();
+
+                discCount = (int)numberOfDiscs;
+            }
+
+            return discCount;
+        }
+        
+        /// <summary>
+        /// Get a list of records without reviews.
+        /// </summary>
+        public static IEnumerable<dynamic> MissingRecordReviews()
+        {
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records
+                    .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { artist, record })
+                    .Where(r => string.IsNullOrEmpty(r.record.Review))
+                    .OrderBy(r => r.artist.LastName).ThenBy(r => r.artist.FirstName)
+                    .ToList();
+
+                return records.Select(r => new
+                {
+                    ArtistId = r.artist.ArtistId,
+                    Artist = r.artist.Name,
+                    RecordId = r.record.RecordId,
+                    Name = r.record.Name,
+                    Recorded = r.record.Recorded,
+                    Rating = r.record.Rating,
+                    Media = r.record.Media
+                });
+            }
+        }
+
+        public static int SumOfMissingReviews()
+        {
+            int total = 0;
+
+            using (var context = new RecordDbContext())
+            {
+                var count = context.Records
+                           .Where(r => string.IsNullOrEmpty(r.Review))
+                           .Count();
+
+                total = count;
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// Get total number of discs for each artist.
+        /// </summary>
+        public static IEnumerable<dynamic> GetTotalArtistDiscs()
+        {
+            var list = new List<dynamic>();
+
+            using (var context = new RecordDbContext())
+            {
+                return context.Artists
+                          .OrderBy(a => a.LastName)
+                          .ThenBy(a => a.FirstName)
+                          .Select(artist => new
+                          {
+                              ArtistName = artist.Name,
+                              Discs = context.Records.Where(r => r.ArtistId == artist.ArtistId).Sum(r => r.Discs)
+                          })
+                          .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Get total cost spent on each artist.
+        /// </summary>
+        public static IEnumerable<dynamic> GetCostTotals()
+        {
+            var list = new List<dynamic>();
+
+            using (var context = new RecordDbContext())
+            {
+                return context.Artists
+                          .OrderBy(a => a.LastName)
+                          .ThenBy(a => a.FirstName)
+                          .Select(artist => new
+                          {
+                              ArtistName = artist.Name,
+                              Cost = context.Records.Where(r => r.ArtistId == artist.ArtistId).Sum(r => r.Cost)
+                          })
+                          .ToList();
+            }
+        }
     }
 }

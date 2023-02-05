@@ -1,4 +1,5 @@
-﻿using RecordEF.Models;
+﻿using RecordEF.Data;
+using RecordEF.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,46 +10,55 @@ namespace RecordEF.Data
 {
     public class ArtistData
     {
-        /// <summary>
-        /// Show a list of artist Names.
-        /// </summary>
-        public static void GetArtistNames()
+        public static List<Artist> GetArtists()
         {
-            using (var context = new RecordDbContext())
+            var list = new List<Artist>();
+            using (var db = new RecordDbContext())
             {
-                var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-
-                foreach (Artist a in artists)
-                {
-                    Console.WriteLine(a.Name);
-                }
+                return list = db.Artists.OrderBy(a => a.LastName).ThenBy(a => a.FirstName).ToList();
             }
         }
 
-        /// <summary>
-        /// Get Artist details including the artist biography.
-        /// </summary>
-        public static void GetArtist(int artistId)
+        public static string GetArtistName(int artistId)
+        {
+            var name = string.Empty;
+
+            using (var context = new RecordDbContext())
+            {
+                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
+
+                if (artist != null)
+                {
+                    name = artist.Name;
+                }
+            }
+
+            return name;
+        }
+
+        public static Artist GetArtist(int artistId)
         {
             using (var context = new RecordDbContext())
             {
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
 
-                if (artist is Artist)
+                if (artist != null)
                 {
-                    Console.WriteLine(artist);
+                    return artist;
                 }
                 else
                 {
-                    Console.WriteLine($"Artist with Id: {artistId} not found!");
+                    artist = new()
+                    {
+                        ArtistId = 0
+                    };
+
+                    return artist;
                 }
             }
         }
 
-        /// <summary>
-        /// Select all artists with no biography.
-        /// </summary>
-        public static void SelectArtistWithNoBio()
+        public static List<Artist> GetArtistsWithNoBio()
         {
             using (var context = new RecordDbContext())
             {
@@ -57,12 +67,85 @@ namespace RecordEF.Data
                     .ThenBy(a => a.FirstName)
                     .ToList();
 
-                if (artists.Any())
+                return artists;
+            }
+        }
+
+        public static int NoBiographyCount()
+        {
+            var number = 0;
+            using (var context = new RecordDbContext())
+            {
+                number = context.Artists.Where(a => string.IsNullOrEmpty(a.Biography)).Count();
+            }
+
+            return number;
+        }
+
+        /// <summary>
+        /// Check if an Artist already exists.
+        /// </summary>
+        public static bool CheckForArtistName(string name)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artist = context.Artists.Where(a => a.Name == name).FirstOrDefault();
+                if (artist is null)
                 {
-                    foreach (var artist in artists)
-                    {
-                        Console.WriteLine($"{artist}");
-                    }
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Insert a new artist entity.
+        /// </summary>
+        public static int InsertArtist(Artist artist)
+        {
+            using (var context = new RecordDbContext())
+            {
+                context.Artists.Add(artist);
+                context.SaveChanges();
+
+                var newArtist = context.Artists.OrderByDescending(x => x.ArtistId).FirstOrDefault();
+
+                if (newArtist != null)
+                {
+                    return newArtist.ArtistId;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+        /// <summary>
+        /// Update an artist.
+        /// </summary>
+        public static bool UpdateArtist(Artist artist)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artistToUpdate = context.Artists.FirstOrDefault(a => a.ArtistId == artist.ArtistId);
+
+                if (artistToUpdate != null)
+                {
+                    artistToUpdate.FirstName = artist.FirstName;
+                    artistToUpdate.LastName = artist.LastName;
+                    artistToUpdate.Name = string.IsNullOrEmpty(artist.FirstName) ? artist.LastName : $"{artist.FirstName} {artist.LastName}";
+                    artistToUpdate.Biography = artist.Biography;
+
+                    context.SaveChanges();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
         }
@@ -70,7 +153,7 @@ namespace RecordEF.Data
         /// <summary>
         /// Delete an artist.
         /// </summary>
-        public static void DeleteArtist(int artistId)
+        public static bool DeleteArtist(int artistId)
         {
             using (var context = new RecordDbContext())
             {
@@ -81,7 +164,11 @@ namespace RecordEF.Data
                     context.Artists.Remove(artist);
                     context.SaveChanges();
 
-                    Console.WriteLine($"Artist with Id: {artistId} deleted.");
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
         }
@@ -89,70 +176,21 @@ namespace RecordEF.Data
         /// <summary>
         /// Get artist id by firstName, lastName.
         /// </summary>
-        public static void GetArtistId(string firstName, string lastName)
+        public static int GetArtistId(string firstName, string lastName)
         {
             var name = string.IsNullOrEmpty(firstName) ? lastName : $"{firstName} {lastName}";
 
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.FirstOrDefault(a => a.Name == name);
+                var artist = context.Artists.FirstOrDefault(a => a.Name.ToLower() == name.ToLower());
 
                 if (artist != null)
                 {
-                    Console.WriteLine($"Artist Id is {artist.ArtistId}");
+                    return artist.ArtistId;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Update an artist.
-        /// </summary>
-        public static void UpdateArtist(int artistId)
-        {
-            using (var context = new RecordDbContext())
-            {
-                var artistToUpdate = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
-
-                if (artistToUpdate != null)
+                else
                 {
-                    artistToUpdate.FirstName = "Alan";
-                    artistToUpdate.LastName = "Robsano";
-                    artistToUpdate.Name = string.IsNullOrEmpty(artistToUpdate.FirstName) ? artistToUpdate.LastName : $"{artistToUpdate.FirstName} {artistToUpdate.LastName}";
-                    artistToUpdate.Biography = "Alan hates country and western. He hates both kinds of music.";
-
-                    context.SaveChanges();
-
-                    Console.WriteLine($"Artist Id: {artistToUpdate.ArtistId} updated.");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Insert a new artist entity.
-        /// </summary>
-        public static void InsertArtist()
-        {
-            Artist artist = new()
-            {
-                FirstName = "Alano",
-                LastName = "Robosono",
-                Name = "",
-                Biography = "Alan is a country and western singer. He likes both kinds of music."
-            };
-
-            artist.Name = string.IsNullOrEmpty(artist.FirstName) ? artist.LastName : $"{artist.FirstName} {artist.LastName}";
-
-            using (var context = new RecordDbContext())
-            {
-                var artists = context.Artists;
-                artists.Add(artist);
-                context.SaveChanges();
-
-                var newArtist = context.Artists.OrderByDescending(x => x.ArtistId).FirstOrDefault();
-
-                if (newArtist != null)
-                {
-                    Console.WriteLine($"{newArtist}");
+                    return 0;
                 }
             }
         }
@@ -160,19 +198,21 @@ namespace RecordEF.Data
         /// <summary>
         /// Show an artist as Html.
         /// </summary>
-        public static void ShowArtist(int artistId)
+        public static string ShowArtist(int artistId)
         {
+            var artistRecord = string.Empty;
+
             using (var context = new RecordDbContext())
             {
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
 
                 if (artist != null)
                 {
-                    string artistRecord = ToHtml(artist);
-
-                    Console.WriteLine(artistRecord);
+                    artistRecord = ToHtml(artist);
                 }
             }
+
+            return artistRecord;
         }
 
         /// <summary>
@@ -184,23 +224,23 @@ namespace RecordEF.Data
         {
             var artistDetails = new StringBuilder();
 
-            artistDetails.Append($"<strong>ArtistId: </strong>{artist.ArtistId}<br/>\n");
+            artistDetails.Append($"<p><strong>ArtistId: </strong>{artist.ArtistId}</p>\n");
 
             if (!string.IsNullOrEmpty(artist.FirstName))
             {
-                artistDetails.Append($"<strong>First Name: </strong>{artist.FirstName}<br/>\n");
+                artistDetails.Append($"<p><strong>First Name: </strong>{artist.FirstName}</p>\n");
             }
 
-            artistDetails.Append($"<strong>Last Name: </strong>{artist.LastName}<br/>\n");
+            artistDetails.Append($"<p><strong>Last Name: </strong>{artist.LastName}</p>\n");
 
             if (!string.IsNullOrEmpty(artist.Name))
             {
-                artistDetails.Append($"<strong>Name: </strong>{artist.Name}<br/>\n");
+                artistDetails.Append($"<p><strong>Name: </strong>{artist.Name}</p>\n");
             }
 
             if (!string.IsNullOrEmpty(artist.Biography))
             {
-                artistDetails.Append($"<strong>Biography: </strong>{artist.Biography}<br/>\n");
+                artistDetails.Append($"<p><strong>Biography: </strong></p>\n<div>\n{artist.Biography}\n</div>\n");
             }
 
             return artistDetails.ToString();
@@ -209,68 +249,81 @@ namespace RecordEF.Data
         /// <summary>
         /// Get biography from the current record Id.
         /// </summary>
-        public static void GetBiography(int artistId)
+        public static string GetBiography(int artistId)
         {
+            var bio = new StringBuilder();
+
             using (var context = new RecordDbContext())
             {
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
                 if (artist != null)
                 {
-                    Console.WriteLine($"Name: {artist.Name}");
-                    Console.WriteLine($"Biography: {artist.Biography}");
+                    bio.Append($"Name: {artist.Name}\n");
+                    bio.Append($"Biography:\n{artist.Biography}");
                 }
             }
+
+            return bio.ToString();
         }
 
-        public static void GetArtistByName(string artistName)
+        public static string GetArtistByName(string artistName)
         {
+            var artistRecords = new StringBuilder();
+
             using (var context = new RecordDbContext())
             {
                 var records = context.Records
                     .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { record, artist })
-                    .Where(r => r.artist.Name != null && r.artist.Name.Contains(artistName))
+                    .Where(r => r.artist.Name != null && r.artist.Name.ToLower().Contains(artistName.ToLower()))
                     .OrderBy(r => r.record.Recorded)
                     .ToList();
 
-                Console.WriteLine($"{artistName}:");
+                artistRecords.Append($"{artistName}\n");
 
                 if (records.Any())
                 {
                     foreach (var r in records)
                     {
-                        Console.WriteLine($"\t{r.record.Name} - {r.record.Recorded} - {r.record.Media}");
+                        artistRecords.Append($"\t{r.record.Name} - {r.record.Recorded} - {r.record.Media}\n");
                     }
                 }
             }
+
+            return artistRecords.ToString();
         }
 
-        public static void GetArtistById(int id)
+        public static string GetArtistById(int artistId)
         {
-            RecordDbContext context = new();
+            var artistRecords = new StringBuilder();
 
-            var artist = context.Artists.FirstOrDefault(a => a.ArtistId == id);
-            var records = context.Records.Where(r => r.ArtistId == id).OrderByDescending(r => r.Recorded).ToList();
-
-            if (artist is Artist)
+            using (var context = new RecordDbContext())
             {
-                Console.WriteLine($"{artist.Name} - {artist.ArtistId}");
+                var records = context.Records
+                                    .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { record, artist })
+                                    .Where(r => r.artist.ArtistId == artistId)
+                                    .OrderBy(r => r.record.Recorded)
+                                    .ToList();
 
-                foreach (var r in records)
+                if (records.Any())
                 {
-                    Console.WriteLine($"\t{r.Name} - {r.Recorded} ({r.Media})");
+                    artistRecords.Append($"{records[0].artist.ArtistId} - {records[0].artist.Name}\n\n");
+
+                    foreach (var r in records)
+                    {
+                        artistRecords.Append($"\t{r.record.Name} - {r.record.Recorded} ({r.record.Media})\n");
+                    }
                 }
             }
+
+            return artistRecords.ToString();
         }
 
-        public static void GetArtists()
+        public static Artist GetArtistEntity(int artistId)
         {
-            RecordDbContext context = new();
-
-            var artists = context.Artists.OrderBy(a => a.LastName).ThenBy((a => a.FirstName)).ToList();
-
-            foreach (Artist a in artists)
+            using (var context = new RecordDbContext())
             {
-                Console.WriteLine($"{a.Name} - {a.ArtistId}");
+                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
+                return artist ?? new Artist { ArtistId = 0 };
             }
         }
     }
