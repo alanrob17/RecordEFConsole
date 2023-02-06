@@ -92,7 +92,8 @@ namespace RecordEF.Data
                         Name = r.Name,
                         Recorded = r.Recorded,
                         Rating = r.Rating,
-                        Media = r.Media
+                        Media = r.Media,
+                        Review = r.Review
                     })
                     .FirstOrDefault(r => r.RecordId == recordId);
 
