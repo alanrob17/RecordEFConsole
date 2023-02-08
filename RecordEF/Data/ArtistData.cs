@@ -123,6 +123,7 @@ namespace RecordEF.Data
                 }
             }
         }
+
         /// <summary>
         /// Update an artist.
         /// </summary>

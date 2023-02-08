@@ -158,7 +158,6 @@ namespace RecordEF.Data
             }
         }
 
-
         /// <summary>
         /// Get record details including the artist name.
         /// </summary>
