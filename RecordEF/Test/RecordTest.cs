@@ -109,7 +109,7 @@ namespace RecordEF.Test
 
         internal static void GetNoReviewCount()
         {
-            var count = _rd.SumOfMissingReviews();
+            var count = _rd.GetMissingReviewsCount();
 
             Console.WriteLine($"The total number of missing reviews is {count}");
         }

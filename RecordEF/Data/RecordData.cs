@@ -1,11 +1,16 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
 using RecordEF.Data;
 using RecordEF.Models;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RecordEF.Data
 {
@@ -192,25 +197,34 @@ namespace RecordEF.Data
         /// <summary>
         /// Get record details.
         /// </summary>
+        //public static Record GetRecordEntity(int recordId)
+        //{
+        //    using (var context = new RecordDbContext())
+        //    {
+        //        var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+
+        //        if (record is Record)
+        //        {
+        //            return record;
+        //        }
+        //        else
+        //        {
+        //            Record missingRecord = new()
+        //            {
+        //                RecordId = 0
+        //            };
+
+        //            return missingRecord;
+        //        }
+        //    }
+        //}
+
         public static Record GetRecordEntity(int recordId)
         {
             using (var context = new RecordDbContext())
             {
                 var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
-
-                if (record is Record)
-                {
-                    return record;
-                }
-                else
-                {
-                    Record missingRecord = new()
-                    {
-                        RecordId = 0
-                    };
-
-                    return missingRecord;
-                }
+                return record ?? new Record { RecordId = 0 };
             }
         }
 
@@ -255,24 +269,15 @@ namespace RecordEF.Data
         /// </summary>
         public static int GetArtistNumberOfRecords(int artistId)
         {
-            var discs = 0;
-
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
-
                 var sumOfDiscs = context.Records
-                    .Where(r => r.ArtistId == 114)
+                    .Where(r => r.ArtistId == artistId)
                     .Select(r => r.Discs)
                     .Sum();
 
-                if (sumOfDiscs > 0 && artist is Artist)
-                {
-                    discs = (int)sumOfDiscs;
-                }
+                return sumOfDiscs > 0 ? (int)sumOfDiscs : 0;
             }
-
-            return discs;
         }
 
         /// <summary>
@@ -280,25 +285,17 @@ namespace RecordEF.Data
         /// </summary>
         public static string GetFormattedRecord(int recordId)
         {
-            var recordDetails = string.Empty;
-
             using (var context = new RecordDbContext())
             {
-                var record = context.Records.SingleOrDefault(r => r.RecordId == recordId);
+                var record = context.Records.Find(recordId);
 
-                if (record is Record)
-                {
-                    recordDetails = record.ToString();
-                }
+                return record != null ? record.ToString() : string.Empty; ;
             }
-
-            return recordDetails;
         }
 
         public static string GetArtistNameFromRecord(int recordId)
         {
             var artistName = string.Empty;
-
             using (var context = new RecordDbContext())
             {
                 var record = context.Records
@@ -308,7 +305,7 @@ namespace RecordEF.Data
 
                 if (record.Any())
                 {
-                    artistName = record[0].artist.Name;
+                    artistName = record[0]?.artist?.Name ?? string.Empty;
                 }
             }
 
@@ -321,19 +318,15 @@ namespace RecordEF.Data
         public static int GetDiscCountForYear(int year)
         {
             var discCount = 0;
-
             using (var context = new RecordDbContext())
             {
                 var records = context.Records.ToList();
-
                 var numberOfDiscs = records
-                    .Where(r => r.Recorded == year)
-                    .Select(r => r.Discs)
-                    .Sum();
-
+                .Where(r => r.Recorded == year)
+                .Select(r => r.Discs)
+                .Sum();
                 discCount = (int)numberOfDiscs;
             }
-
             return discCount;
         }
 
@@ -343,22 +336,18 @@ namespace RecordEF.Data
         public static int GetBoughtDiscCountForYear(int year)
         {
             var discCount = 0;
-
             using (var context = new RecordDbContext())
             {
                 var records = context.Records.ToList();
-
                 var numberOfDiscs = records
-                    .Where(r => r.Bought != null && r.Bought.Value.Year == year)
-                    .Select(r => r.Discs)
-                    .Sum();
-
+                .Where(r => r.Bought != null && r.Bought.Value.Year == year)
+                .Select(r => r.Discs)
+                .Sum();
                 discCount = (int)numberOfDiscs;
             }
-
             return discCount;
         }
-        
+
         /// <summary>
         /// Get a list of records without reviews.
         /// </summary>
@@ -385,20 +374,12 @@ namespace RecordEF.Data
             }
         }
 
-        public static int SumOfMissingReviews()
+        public static int GetMissingReviewsCount()
         {
-            int total = 0;
-
             using (var context = new RecordDbContext())
             {
-                var count = context.Records
-                           .Where(r => string.IsNullOrEmpty(r.Review))
-                           .Count();
-
-                total = count;
+                return context.Records.Count(r => string.IsNullOrEmpty(r.Review));
             }
-
-            return total;
         }
 
         /// <summary>

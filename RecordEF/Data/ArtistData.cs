@@ -131,13 +131,25 @@ namespace RecordEF.Data
         /// <summary>
         /// Get artist id by firstName, lastName.
         /// </summary>
+        //public static int GetArtistId(string firstName, string lastName)
+        //{
+        //    var name = string.IsNullOrEmpty(firstName) ? lastName : $"{firstName} {lastName}";
+
+        //    using (var context = new RecordDbContext())
+        //    {
+        //        var artist = context.Artists.FirstOrDefault(a => a.Name.ToLower() == name.ToLower());
+
+        //        return artist?.ArtistId ?? 0;
+        //    }
+        //}
+
         public static int GetArtistId(string firstName, string lastName)
         {
             var name = string.IsNullOrEmpty(firstName) ? lastName : $"{firstName} {lastName}";
 
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.FirstOrDefault(a => a.Name.ToLower() == name.ToLower());
+                var artist = context.Artists.FirstOrDefault(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase));
 
                 return artist?.ArtistId ?? 0;
             }
