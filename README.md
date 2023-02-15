@@ -11,6 +11,8 @@ This version uses SQL Server with Entity Framework and Linq to extract data from
 * Microsoft.EntityFrameworkCore.Tools
 * System.Configuration.ConfigurationManager
 
+## Database diagram
+
 At present I have created routines for the **Artist** and **Record** tables that have a **one** Artist **to many** Records relationship.
 
 ![Database diagram](diagram.jpg "Database diagram")
