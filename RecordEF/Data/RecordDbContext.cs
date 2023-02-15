@@ -31,7 +31,7 @@ public partial class RecordDbContext : DbContext
             
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        string constr = System.Configuration.ConfigurationManager.ConnectionStrings["RecordDBContext"].ConnectionString;
+        string constr = ConfigurationManager.ConnectionStrings["RecordDBContext"].ConnectionString;
 
         optionsBuilder.UseSqlServer(constr);
     }

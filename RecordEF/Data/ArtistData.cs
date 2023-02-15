@@ -2,6 +2,8 @@
 using RecordEF.Models;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,40 +23,18 @@ namespace RecordEF.Data
 
         public static string GetArtistName(int artistId)
         {
-            var name = string.Empty;
-
             using (var context = new RecordDbContext())
             {
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
-
-                if (artist != null)
-                {
-                    name = artist.Name;
-                }
+                return artist?.Name ?? string.Empty;
             }
-
-            return name;
         }
 
         public static Artist GetArtist(int artistId)
         {
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
-
-                if (artist != null)
-                {
-                    return artist;
-                }
-                else
-                {
-                    artist = new()
-                    {
-                        ArtistId = 0
-                    };
-
-                    return artist;
-                }
+                return context.Artists.FirstOrDefault(a => a.ArtistId == artistId) ?? new Artist { ArtistId = 0 };
             }
         }
 
@@ -76,10 +56,8 @@ namespace RecordEF.Data
             var number = 0;
             using (var context = new RecordDbContext())
             {
-                number = context.Artists.Where(a => string.IsNullOrEmpty(a.Biography)).Count();
+                return number = context.Artists.Where(a => string.IsNullOrEmpty(a.Biography)).Count();
             }
-
-            return number;
         }
 
         /// <summary>
@@ -89,15 +67,7 @@ namespace RecordEF.Data
         {
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.Where(a => a.Name == name).FirstOrDefault();
-                if (artist is null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return context.Artists.Any(a => a.Name == name);
             }
         }
 
@@ -113,14 +83,7 @@ namespace RecordEF.Data
 
                 var newArtist = context.Artists.OrderByDescending(x => x.ArtistId).FirstOrDefault();
 
-                if (newArtist != null)
-                {
-                    return newArtist.ArtistId;
-                }
-                else
-                {
-                    return 0;
-                }
+                return newArtist?.ArtistId ?? 0;
             }
         }
 
@@ -132,22 +95,15 @@ namespace RecordEF.Data
             using (var context = new RecordDbContext())
             {
                 var artistToUpdate = context.Artists.FirstOrDefault(a => a.ArtistId == artist.ArtistId);
+                if (artistToUpdate == null) return false;
 
-                if (artistToUpdate != null)
-                {
-                    artistToUpdate.FirstName = artist.FirstName;
-                    artistToUpdate.LastName = artist.LastName;
-                    artistToUpdate.Name = string.IsNullOrEmpty(artist.FirstName) ? artist.LastName : $"{artist.FirstName} {artist.LastName}";
-                    artistToUpdate.Biography = artist.Biography;
+                artistToUpdate.FirstName = artist.FirstName;
+                artistToUpdate.LastName = artist.LastName;
+                artistToUpdate.Name = string.IsNullOrEmpty(artist.FirstName) ? artist.LastName : $"{artist.FirstName} {artist.LastName}";
+                artistToUpdate.Biography = artist.Biography;
 
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                context.SaveChanges();
+                return true;
             }
         }
 
@@ -158,7 +114,7 @@ namespace RecordEF.Data
         {
             using (var context = new RecordDbContext())
             {
-                var artist = context.Artists.FirstOrDefault(r => r.ArtistId == artistId);
+                var artist = context.Artists.Find(artistId);
 
                 if (artist != null)
                 {
@@ -167,10 +123,8 @@ namespace RecordEF.Data
 
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
 
@@ -185,14 +139,7 @@ namespace RecordEF.Data
             {
                 var artist = context.Artists.FirstOrDefault(a => a.Name.ToLower() == name.ToLower());
 
-                if (artist != null)
-                {
-                    return artist.ArtistId;
-                }
-                else
-                {
-                    return 0;
-                }
+                return artist?.ArtistId ?? 0;
             }
         }
 
@@ -201,20 +148,19 @@ namespace RecordEF.Data
         /// </summary>
         public static string ShowArtist(int artistId)
         {
-            var artistRecord = string.Empty;
-
             using (var context = new RecordDbContext())
             {
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
 
                 if (artist != null)
                 {
-                    artistRecord = ToHtml(artist);
+                    return ToHtml(artist);
                 }
             }
 
-            return artistRecord;
+            return string.Empty;
         }
+
 
         /// <summary>
         /// ToHtml method shows an instances properties

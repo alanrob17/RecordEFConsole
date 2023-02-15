@@ -17,13 +17,13 @@ namespace RecordEF
             // _at.CreateArtist();
             // _at.GetArtistById(114);
             // _at.GetArtistEntity(114);
-            // _at.GetArtistByName("Bruce Cockburn");
+            // _at.GetArtistByName("Bob Dylan");
             // _at.GetBiography(114);
             // _at.ArtistHtml(114);
             // _at.GetArtistId("Bob", "Dylan");
-            // _at.UpdateArtist(833);
-            // _at.DeleteArtist(833);
-            // _at.GetArtist(256);
+            // _at.UpdateArtist(836);
+            // _at.DeleteArtist(836);
+            // _at.GetArtist(114);
             // _at.GetArtistName(114);
             // _at.GetArtistNames();
             // _at.GetArtistsWithNoBio();
