@@ -2,7 +2,33 @@
 
 This is a .Net Core console program that is used to test methods that I have created for use in My ASP.Net core website.
 
-This version uses SQL Server with Entity Framework and Linq to extract data from my Record database.
+This version uses **SQL Server** with **Entity Framework** and **Linq** to extract data from my Record database.
+
+See the [RecordEFConsole repository](https://github.com/alanrob17/RecordEFConsole) README for documentation on the database structure.
+
+## Other versions of this code
+
+I have written a number of different versions of this code using various database technologies.
+
+The original code was written using ADO.Net 3.5 and is in a private repository. I can make this code available if you require.
+
+### SQL Server
+
+* [Entity Framework and SQL server.](https://github.com/alanrob17/RecordEFConsole)
+* [Dapper and SQL Server.](https://github.com/alanrob17/RecordDbSqlDapperApp)
+
+### Sqlite
+
+* [Entity Framework and Sqlite.](https://github.com/alanrob17/RecordDBEFSQLite)
+* [Dapper and Sqlite.](https://github.com/alanrob17/RecordDbSQLiteDapper)
+
+### JavaScript
+
+I have a Javascript version of my Record database that consumes JSON data from local storage.
+
+[RecordDb Website](https://recordlist.netlify.app/)
+
+[Source code.](https://github.com/alanrob17/recorddb-app)
 
 ## Packages used
 

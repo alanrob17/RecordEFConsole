@@ -423,5 +423,39 @@ namespace RecordEF.Data
                           .ToList();
             }
         }
+
+        public static Artist GetArtistByRecordId(int recordId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artistRecord = context.Records
+                .Join(context.Artists, r => r.ArtistId, a => a.ArtistId, (r, a) => new
+                {
+                    ArtistId = a.ArtistId,
+                    FirstName = a.FirstName,
+                    LastName = a.LastName,
+                    Name = a.Name,
+                    Biography = a.Biography,
+                    RecordId = r.RecordId
+                })
+                .FirstOrDefault(r => r.RecordId == recordId);
+
+                Artist artist = new();
+                if (artistRecord != null)
+                {
+                    artist.ArtistId = artistRecord.ArtistId;
+                    artist.FirstName = artistRecord.FirstName;
+                    artist.LastName = artistRecord.LastName;
+                    artist.Name = artistRecord.Name;
+                    artist.Biography = artistRecord.Biography;
+                }
+                else
+                {
+                    artist.ArtistId = 0;
+                }
+
+                return artist;
+            }
+        }
     }
 }

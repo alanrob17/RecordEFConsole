@@ -281,6 +281,19 @@ namespace RecordEF.Test
             }
         }
 
+        internal static void GetArtistByRecordId(int recordId)
+        {
+            var artist = _rd.GetArtistByRecordId(recordId);
+            if (artist.ArtistId > 0)
+            {
+                Console.WriteLine(artist.ToString());
+            }
+            else
+            {
+                Console.WriteLine("Artist not found!");
+            }
+        }
+
         //internal static void GetArtistRecordByYear2(int year)
         //{
         //    var list = _rd.GetArtistRecordByYear2(year);

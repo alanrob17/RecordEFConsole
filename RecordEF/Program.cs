@@ -6,6 +6,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Text.RegularExpressions;
 using _at = RecordEF.Test.ArtistTest;
 using _rt = RecordEF.Test.RecordTest;
+using _ret = RecordEF.Test.ReviewTest;
 
 namespace RecordEF
 {
@@ -44,6 +45,7 @@ namespace RecordEF
             // _rt.CountDiscs("CD");
             // _rt.CountDiscs("R");
             // _rt.GetArtistRecordEntity(2196);
+            // _rt.GetArtistByRecordId(2196);
             // _rt.GetArtistNumberOfRecords(114);
             // _rt.GetRecordDetails(2196);
             // _rt.GetArtistNameFromRecord(2196);
@@ -54,6 +56,11 @@ namespace RecordEF
             // _rt.GetTotalArtistCost();
             // _rt.GetTotalArtistDiscs();
             // _rt.RecordHtml(2196);
+
+            //// Reviews
+            // _ret.GetReviews(); // painfully slow.
+            // _ret.GetArtistsAndReviews();
+            // _ret.GetArtistAndReviews("Bob Dylan");
         }
     }
 }
