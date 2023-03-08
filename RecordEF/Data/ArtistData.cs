@@ -155,6 +155,16 @@ namespace RecordEF.Data
             }
         }
 
+        internal static int GetArtistId(int recordId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+
+                return record?.ArtistId ?? 0;
+            }
+        }
+
         /// <summary>
         /// Show an artist as Html.
         /// </summary>

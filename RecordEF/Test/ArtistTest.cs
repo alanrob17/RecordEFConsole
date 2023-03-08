@@ -52,6 +52,20 @@ namespace RecordEF.Test
             }
         }
 
+        internal static void GetArtistId(int recordId)
+        {
+            int artistId = _ad.GetArtistId(recordId);
+
+            if (artistId > 0)
+            {
+                Console.WriteLine($"Artist Id is {artistId}");
+            }
+            else
+            {
+                Console.WriteLine("ERROR: Artist name not found.");
+            }
+        }
+
         internal static void DeleteArtist(int artistId)
         {
             var success = _ad.DeleteArtist(artistId);

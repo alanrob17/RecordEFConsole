@@ -22,6 +22,7 @@ namespace RecordEF
             // _at.GetBiography(114);
             // _at.ArtistHtml(114);
             // _at.GetArtistId("Bob", "Dylan");
+            // _at.GetArtistId(2196);
             // _at.UpdateArtist(836);
             // _at.DeleteArtist(836);
             // _at.GetArtist(114);
