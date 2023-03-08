@@ -214,6 +214,30 @@ namespace RecordEF.Data
         }
 
         /// <summary>
+        /// Fill the record drop down list.
+        /// </summary>
+        /// <returns>The <see cref="Dictionary"/>Record list.</returns>
+        public static Dictionary<int, string> GetRecordDropDownList(int artistId)
+        {
+            var recordDictionary = new Dictionary<int, string>();
+
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.Where(r => r.ArtistId == artistId).OrderByDescending(r => r.Recorded);
+
+                recordDictionary.Add(0, "Select a record...");
+
+                foreach (var record in records)
+                {
+                    var recordName = $"{record.Name} ({record.Media})";
+                    recordDictionary.Add(record.RecordId, recordName);
+                }
+            }
+
+            return recordDictionary;
+        }
+
+        /// <summary>
         /// Count the number of discs.
         /// </summary>
         public static int CountAllDiscs(string media = "")

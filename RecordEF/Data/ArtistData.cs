@@ -131,18 +131,6 @@ namespace RecordEF.Data
         /// <summary>
         /// Get artist id by firstName, lastName.
         /// </summary>
-        //public static int GetArtistId(string firstName, string lastName)
-        //{
-        //    var name = string.IsNullOrEmpty(firstName) ? lastName : $"{firstName} {lastName}";
-
-        //    using (var context = new RecordDbContext())
-        //    {
-        //        var artist = context.Artists.FirstOrDefault(a => a.Name.ToLower() == name.ToLower());
-
-        //        return artist?.ArtistId ?? 0;
-        //    }
-        //}
-
         public static int GetArtistId(string firstName, string lastName)
         {
             var name = string.IsNullOrEmpty(firstName) ? lastName : $"{firstName} {lastName}";
@@ -294,6 +282,36 @@ namespace RecordEF.Data
                 var artist = context.Artists.FirstOrDefault(a => a.ArtistId == artistId);
                 return artist ?? new Artist { ArtistId = 0 };
             }
+        }
+
+        /// <summary>
+        /// Fill the artist drop down list.
+        /// </summary>
+        /// <returns>The <see cref="Dictionary"/>Artist list.</returns>
+        internal static Dictionary<int, string> GetArtistDropDownList()
+        {
+            var artistDictionary = new Dictionary<int, string>();
+
+            using (var context = new RecordDbContext())
+            {
+                var artists = context.Artists.OrderBy(a => a.LastName).ThenBy(a => a.FirstName);
+
+                artistDictionary.Add(0, "Select an artist");
+
+                foreach (var artist in artists)
+                {
+                    if (string.IsNullOrEmpty(artist.FirstName))
+                    {
+                        artistDictionary.Add(artist.ArtistId, artist.LastName);
+                    }
+                    else
+                    {
+                        artistDictionary.Add(artist.ArtistId, $"{artist.LastName}, {artist.FirstName}");
+                    }
+                }
+            }
+
+            return artistDictionary;
         }
     }
 }

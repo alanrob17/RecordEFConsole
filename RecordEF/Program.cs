@@ -30,6 +30,7 @@ namespace RecordEF
             // _at.GetArtistNames();
             // _at.GetArtistsWithNoBio();
             // _at.GetNoBiographyCount();
+            // _at.GetArtistDropdownList();
 
             //// Records
             // _rt.CreateRecord(833);
@@ -47,7 +48,7 @@ namespace RecordEF
             // _rt.CountDiscs("R");
             // _rt.GetArtistRecordEntity(2196);
             // _rt.GetArtistByRecordId(2196);
-            _rt.GetArtistRecords(114);
+            // _rt.GetArtistRecords(114);
             // _rt.GetArtistNumberOfRecords(114);
             // _rt.GetRecordDetails(2196);
             // _rt.GetArtistNameFromRecord(2196);
@@ -58,6 +59,7 @@ namespace RecordEF
             // _rt.GetTotalArtistCost();
             // _rt.GetTotalArtistDiscs();
             // _rt.RecordHtml(2196);
+            _rt.GetRecordDropdownList(114);
 
             //// Reviews
             // _ret.GetReviews(); // painfully slow.

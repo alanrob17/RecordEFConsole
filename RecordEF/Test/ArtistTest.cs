@@ -222,5 +222,15 @@ namespace RecordEF.Test
 
             Console.WriteLine(artistRecords);
         }
+
+        internal static void GetArtistDropdownList()
+        {
+            var artistList = _ad.GetArtistDropDownList();
+
+            foreach (var artist in artistList)
+            {
+                Console.WriteLine($"{artist.Key} - {artist.Value}");
+            }
+        }
     }
 }
