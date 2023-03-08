@@ -47,6 +47,7 @@ namespace RecordEF
             // _rt.CountDiscs("R");
             // _rt.GetArtistRecordEntity(2196);
             // _rt.GetArtistByRecordId(2196);
+            _rt.GetArtistRecords(114);
             // _rt.GetArtistNumberOfRecords(114);
             // _rt.GetRecordDetails(2196);
             // _rt.GetArtistNameFromRecord(2196);

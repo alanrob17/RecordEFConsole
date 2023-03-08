@@ -194,31 +194,16 @@ namespace RecordEF.Data
             return artistRecord.ToString();
         }
 
-        /// <summary>
-        /// Get record details.
-        /// </summary>
-        //public static Record GetRecordEntity(int recordId)
-        //{
-        //    using (var context = new RecordDbContext())
-        //    {
-        //        var record = context.Records.FirstOrDefault(r => r.RecordId == recordId);
+        public static List<Record> GetArtistRecords(int artistId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.Where(r => r.ArtistId == artistId).OrderByDescending(r => r.Recorded).ToList();
 
-        //        if (record is Record)
-        //        {
-        //            return record;
-        //        }
-        //        else
-        //        {
-        //            Record missingRecord = new()
-        //            {
-        //                RecordId = 0
-        //            };
-
-        //            return missingRecord;
-        //        }
-        //    }
-        //}
-
+                return records.Any() ? records : new List<Record>();
+            }
+        }
+                 
         public static Record GetRecordEntity(int recordId)
         {
             using (var context = new RecordDbContext())

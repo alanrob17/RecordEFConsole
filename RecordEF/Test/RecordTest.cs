@@ -294,6 +294,16 @@ namespace RecordEF.Test
             }
         }
 
+        internal static void GetArtistRecords(int artistId)
+        {
+            var records = _rd.GetArtistRecords(artistId);
+
+            foreach (var record in records)
+            {
+                Console.WriteLine(record.ToString());
+            }
+        }
+
         //internal static void GetArtistRecordByYear2(int year)
         //{
         //    var list = _rd.GetArtistRecordByYear2(year);
