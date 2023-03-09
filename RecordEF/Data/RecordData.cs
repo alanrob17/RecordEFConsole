@@ -466,5 +466,40 @@ namespace RecordEF.Data
                 return artist;
             }
         }
+
+        /// <summary>
+        /// Select a single Artist by Id
+        /// </summary>
+        /// <param name="artistId">The artist Id.</param>
+        public static dynamic Select(int recordId)
+        {
+            using (var context = new RecordDbContext())
+            {
+                var artistRecord = context.Records
+                    .Join(context.Artists, record => record.ArtistId, artist => artist.ArtistId, (record, artist) => new { record, artist })
+                    .Where(r => r.record.RecordId == recordId)
+                    .Select(r => new
+                    {
+                        ArtistId = r.artist.ArtistId,
+                        ArtistName = r.artist.Name,
+                        RecordId = r.record.RecordId,
+                        Name = r.record.Name,
+                        Field = r.record.Field,
+                        Recorded = r.record.Recorded,
+                        Label = r.record.Label,
+                        Rating = r.record.Rating,
+                        Bought = r.record.Bought,
+                        Pressing = r.record.Pressing,
+                        Discs = r.record.Discs,
+                        Media = r.record.Media,
+                        Cost = r.record.Cost,
+                        CoverName = r.record.CoverName,
+                        Review = r.record.Review,
+                        FreeDbId = r.record.FreeDbId
+                    }).FirstOrDefault();
+
+                return artistRecord;
+            }
+        }
     }
 }

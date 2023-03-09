@@ -37,6 +37,7 @@ namespace RecordEF
             //_rt.UpdateRecord(5257);
             // _rt.DeleteRecord(5257);
             // _rt.GetRecordById(2196);
+            // _rt.Select(2196);
             // _rt.GetRecordEntity(2196);
             // _rt.GetArtistRecordByYear(1974);
             // _rt.GetRecordList();
@@ -59,7 +60,7 @@ namespace RecordEF
             // _rt.GetTotalArtistCost();
             // _rt.GetTotalArtistDiscs();
             // _rt.RecordHtml(2196);
-            _rt.GetRecordDropdownList(114);
+            // _rt.GetRecordDropdownList(114);
 
             //// Reviews
             // _ret.GetReviews(); // painfully slow.
