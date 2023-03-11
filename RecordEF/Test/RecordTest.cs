@@ -321,6 +321,27 @@ namespace RecordEF.Test
             Console.WriteLine(record.Name);
         }
 
+        internal static void GetDiscsForYear(int year)
+        {
+            var discs = _rd.GetDiscsForYear(year);
+
+            Console.WriteLine($"For {year} I bought {discs} discs.");
+        }
+
+        internal static void GetCostForYear(int year)
+        {
+            var cost = _rd.GetCostForYear(year);
+
+            Console.WriteLine($"For {year} I spent ${cost}.");
+        }
+
+        internal static void GetAverageCostForYear(int year)
+        {
+            var averageCost = _rd.GetAverageCostForYear(year);
+
+            Console.WriteLine($"For {year} the average I spent on a disc was ${averageCost}.");
+        }
+
         //internal static void GetArtistRecordByYear2(int year)
         //{
         //    var list = _rd.GetArtistRecordByYear2(year);

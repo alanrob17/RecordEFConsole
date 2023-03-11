@@ -501,5 +501,58 @@ namespace RecordEF.Data
                 return artistRecord;
             }
         }
+
+        public static int GetDiscsForYear(int year)
+        {
+            var startDate = new DateTime(year - 1, 12, 31);
+            var endDate = new DateTime(year + 1, 1, 1);
+
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.Where(r => r.Bought > startDate && r.Bought < endDate).ToList();
+
+                var discs = records.Sum(r => r.Discs);
+
+                return discs;
+            }
+        }
+
+        public static decimal GetCostForYear(int year)
+        {
+            var startDate = new DateTime(year - 1, 12, 31);
+            var endDate = new DateTime(year + 1, 1, 1);
+
+            using (var context = new RecordDbContext())
+            {
+                var records = context.Records.Where(r => r.Bought > startDate && r.Bought < endDate).ToList();
+
+                var cost = records.Sum(r => r.Cost);
+
+                return decimal.Round((decimal)(cost ?? 0.00m), 2);
+            }
+        }
+
+        public static decimal GetAverageCostForYear(int year)
+        {
+            var averageCost = 0.0m;
+
+            using (var context = new RecordDbContext())
+            {
+                var startDate = new DateTime(year - 1, 12, 31);
+                var endDate = new DateTime(year + 1, 1, 1);
+
+                var records = context.Records.Where(r => r.Bought > startDate && r.Bought < endDate).ToList();
+
+                var discs = records.Sum(r => r.Discs);
+                var cost = records.Sum(r => r.Cost);
+
+                if (discs > 0)
+                {
+                    averageCost = (decimal)cost / discs;
+                }
+
+                return decimal.Round(averageCost, 2);
+            }
+        }
     }
 }

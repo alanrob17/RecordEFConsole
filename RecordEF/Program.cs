@@ -19,7 +19,7 @@ namespace RecordEF
             // _at.GetArtistById(114);
             // _at.GetArtistEntity(114);
             // _at.GetArtistByName("Bob Dylan");
-            _at.GetArtistNameByRecordId(2196);
+            // _at.GetArtistNameByRecordId(2196);
             // _at.GetBiography(114);
             // _at.ArtistHtml(114);
             // _at.GetArtistId("Bob", "Dylan");
@@ -62,6 +62,9 @@ namespace RecordEF
             // _rt.GetTotalArtistDiscs();
             // _rt.RecordHtml(2196);
             // _rt.GetRecordDropdownList(114);
+            // _rt.GetDiscsForYear(2019);
+            // _rt.GetCostForYear(2019);
+            // _rt.GetAverageCostForYear(2019);
 
             //// Reviews
             // _ret.GetReviews(); // painfully slow.
