@@ -19,6 +19,7 @@ namespace RecordEF
             // _at.GetArtistById(114);
             // _at.GetArtistEntity(114);
             // _at.GetArtistByName("Bob Dylan");
+            _at.GetArtistNameByRecordId(2196);
             // _at.GetBiography(114);
             // _at.ArtistHtml(114);
             // _at.GetArtistId("Bob", "Dylan");

@@ -216,6 +216,13 @@ namespace RecordEF.Test
             Console.WriteLine(artist);
         }
 
+        internal static void GetArtistNameByRecordId(int recordId)
+        {
+            var name = _ad.GetArtistNameByRecordId(recordId);
+
+            Console.WriteLine(name);
+        }
+
         internal static void GetArtistById(int artistId)
         {
             var artistRecords = _ad.GetArtistById(artistId);

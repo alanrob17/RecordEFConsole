@@ -313,5 +313,29 @@ namespace RecordEF.Data
 
             return artistDictionary;
         }
+
+        /// <summary>
+        /// Check if an Artist already exists.
+        /// </summary>
+        internal static string GetArtistNameByRecordId(int recordId)
+        {
+            Artist? artist = new();
+
+            using (var context = new RecordDbContext())
+            {
+                var record = context.Records.FirstOrDefault(a => a.RecordId == recordId);
+                if (record != null)
+                {
+                    artist = context.Artists.SingleOrDefault(a => a.ArtistId == record.ArtistId);
+                }
+
+                if (artist != null)
+                {
+                    return artist.Name ?? "Unknown artist";
+                }
+
+                return string.Empty;
+            }
+        }
     }
 }

@@ -318,7 +318,7 @@ namespace RecordEF.Test
         {
             var record = _rd.Select(recordId);
             Console.WriteLine(record.ArtistName);
-            Console.WriteLine(record.ToString());
+            Console.WriteLine(record.Name);
         }
 
         //internal static void GetArtistRecordByYear2(int year)
